@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk,messagebox
-from Vista_AgregarModificar import Vista_Agregar
+from .Vista_AgregarModificar import Vista_Agregar
 from Recetario_Logica import RecetarioLogica as rl
-from Vista_Receta import VistaReceta as vr
+from .Vista_Receta import VistaReceta as vr
 import math
 import datetime as dt
 
@@ -19,7 +19,7 @@ class Recetario(ttk.Frame):
         self.alignstr = '%dx%d+%d+%d' % (self.parent.width, self.parent.height, (self.screenwidth - self.parent.width) / 2, (self.screenheight - self.parent.height) / 2)
         self.parent.geometry(self.alignstr)
         self.parent.title("RECETARIO")
-        self.parent.iconbitmap('icono.ico')
+        self.parent.iconbitmap('imagenes/icono.ico')
         self.recetario = rl("Recetario.json")
         self.crear_widgets()
         self.cargar_receta_dia()
@@ -184,6 +184,4 @@ class Recetario(ttk.Frame):
             messagebox.showinfo("Rcetario","Seleccione un filtro para buscar") 
             
 
-root = tk.Tk()
-recetario = Recetario(root)
-root.mainloop()
+
