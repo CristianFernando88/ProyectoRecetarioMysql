@@ -1,36 +1,32 @@
 import mysql.connector
+from Config import credenciales
+from mysql.connector import errors
+class Conexion:
+    _conn = None
+    _cursor = None
 
-class Coneccion:
-    def __init__(self):
-        self.__user = 'root'
-        self.__pass = '1088'
-        self.__host = 'localhost'
-        self.__db = 'supermarket'
-        self.__conn = None
-        self.__cursor = None
-    def conectar(self):
-        try:
-            self.__conn = mysql.connector.connect(user=self.__user,password = self.__pass,host=self.__host,database = self.__db)
-            self.__cursor = self.__conn.cursor()
-        except Exception as e:
-            print(f"No se pudo concetar a la base: {e}")
+    @classmethod
+    def conectar(cls):
+        if cls._conn is None:
+            try:
+                cls._conn = mysql.connector.connect(**credenciales)
+                return cls._conn
+            except errors.DatabaseError as e:
+                print(f"No se pudo concetar a la base: {e}")
+        else:
+            return cls._conn
     
-    def close_conn(self):
-        try:
-            self.__conn.close()
-        except Exception as e:
-            print(f"Error al cerrar la conexion: {e}")
-
-    def consulta(self,query):
-        rs = None
-        try:
-            self.__cursor.execute(query)
-            rs = self.__cursor.fetchall()
-        except Exception as e:
-            print(f"No se pudo realizar la consulta: {e}")
-        
-        return rs
-
+    @classmethod
+    def getCursor(cls):
+        if cls._cursor is None:
+            try:
+                cls._cursor = cls.conectar().cursor()
+                return cls._cursor
+            except errors.DatabaseError as e:
+                print("Problema para retornar conexion");
+        else:
+            return cls._cursor
+       
 
 if __name__ == "__main__":
     '''conn = mysql.connector.connect(user='root',password = '1088',host='localhost',database = 'sakila')
@@ -45,10 +41,11 @@ if __name__ == "__main__":
 
     print(rs)'''
 
-    conexion =  Coneccion()
-    conexion.conectar()
-    resultado_consulta = conexion.consulta("SELECT * FROM producto")
+    conexion =  Conexion.conectar()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM receta")
+    consulta = cursor.fetchall()
     conexion.close_conn()
-    print(resultado_consulta)
+    print(consulta)
 
 
