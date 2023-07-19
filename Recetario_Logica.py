@@ -1,7 +1,7 @@
 from Recetario_Servicios import RecetasCrud as rc
-from Receta import Receta
-from Pasos import Pasos
-from Ingrediente import Ingrediente
+from clases.Receta import Receta
+from clases.Pasos import Pasos
+from clases.Ingrediente import Ingrediente
 import random
 class RecetarioLogica:
     '''Interactuca con los objetos receta y el archivo json donde se guardaran los datos'''

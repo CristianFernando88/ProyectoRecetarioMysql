@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk,messagebox
-from Receta import Receta
-from Ingrediente import Ingrediente
-from Pasos import Pasos
+from clases.Receta import Receta
+from clases.Ingrediente import Ingrediente
+from clases.Pasos import Pasos
 from Recetario_Logica import RecetarioLogica as rl
 from datetime import datetime as dt
 from PIL import ImageTk, Image

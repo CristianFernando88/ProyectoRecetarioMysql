@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import font,ttk,messagebox
-from Receta import Receta
+from clases.Receta import Receta
 class VistaReceta:
     '''crea una ventana que muestra una receta'''
     def __init__(self,parent,receta):

@@ -3,7 +3,6 @@ from tkinter import ttk,messagebox
 from .Vista_AgregarModificar import Vista_Agregar
 from Recetario_Logica import RecetarioLogica as rl
 from .Vista_Receta import VistaReceta as vr
-import math
 import datetime as dt
 
 

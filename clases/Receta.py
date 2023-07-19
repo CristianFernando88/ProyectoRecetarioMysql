@@ -1,6 +1,6 @@
 import datetime as dt
-from Ingrediente import Ingrediente
-from Pasos import Pasos
+from .Ingrediente import Ingrediente
+from .Pasos import Pasos
 class Receta:
     '''La clase representa a una receta'''
     def __init__(self,nombre="",tiempoPreparacion="",tiempoCocion="",lista_ingredientes = [],lista_pasos= [],imagen=None,etiqueta="",favorito = False):
