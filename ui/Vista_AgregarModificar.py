@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import ttk,messagebox
 from clases.Receta import Receta
+from LogicaRecetario import Logica as log_receta
 from clases.Ingrediente import Ingrediente
 from clases.Pasos import Pasos
-from Recetario_Logica import RecetarioLogica as rl
 from datetime import datetime as dt
 from PIL import ImageTk, Image
 from tkinter import filedialog
@@ -14,7 +14,7 @@ class Vista_Agregar:
         self.ventana = tk.Toplevel(self.parent)
         self.parent = parent
         self.ventana.width=675
-        self.ventana.height=520
+        self.ventana.height=550
         self.screenwidth = self.ventana.winfo_screenwidth()
         self.screenheight = self.ventana.winfo_screenheight()
         self.alignstr = '%dx%d+%d+%d' % (self.ventana.width, self.ventana.height, (self.screenwidth - self.ventana.width) / 2, (self.screenheight - self.ventana.height) / 2)
@@ -37,7 +37,7 @@ class Vista_Agregar:
             self.ventana.title("Modificar Receta")  
             self.bandera_modo = False
             self.receta = receta
-            self.btn_guardarAll.config(text="Modificar")
+            self.btn_guardarAll.config(text="Guardar Cambios")
             self.cargar_receta_modificar()
             
         self.activar_control_paso(0)
@@ -46,7 +46,7 @@ class Vista_Agregar:
         
 
     def crear_widgets(self):
-         
+        '''crea todos los elemntos del frame'''
         lbl_nombre = tk.Label(self.ventana,text="Nombre Receta")
         lbl_nombre.grid(row=0,column=0,padx=10,pady=5)
         input_nombre = tk.Entry(self.ventana,width=20,textvariable=self.nombre)
@@ -121,7 +121,7 @@ class Vista_Agregar:
         lbl_medida = tk.Label(frame_ingredientes,text="Unida de Medida:")
         lbl_medida.grid(row=1,column=0,padx=5,pady=5)
         
-        valores_medida = ("","cc","lt","kg","grs.","unidades","docena","pizca")
+        valores_medida = ("","cc","lt","kg","grs.","unidades","docena","pizca","a gusto")
         self.cbo_medida = ttk.Combobox(frame_ingredientes,values=valores_medida,textvariable=self.unidad,state=tk.DISABLED)
         self.cbo_medida.grid(row=1,column=1,pady=5)
 
@@ -138,8 +138,6 @@ class Vista_Agregar:
         self.btn_guardar.grid(row=1,column=3,sticky=tk.EW,padx=5)
         self.btn_quitar = tk.Button(frame_ingredientes,text="Quitar",command=self.eliminar_ingrediente)
         self.btn_quitar.grid(row=2,column=3,sticky=tk.EW,padx=5)
-
-        
         
         #cuadro preparacion
         #variables preparacion
@@ -165,11 +163,13 @@ class Vista_Agregar:
         self.btn_guardar_paso.grid(row=2,column=1,padx=5,sticky=tk.EW)
         self.btn_eliminar_paso = tk.Button(frame_preparacion,text="Quitar",command=self.eliminar_paso,state=tk.DISABLED)
         self.btn_eliminar_paso.grid(row=2,column=2,padx=5,sticky=tk.EW)
+        self.btn_modificar_paso = tk.Button(frame_preparacion,text="Modificar",command="",state=tk.DISABLED)
+        self.btn_modificar_paso.grid(row=3,column=2,padx=5,sticky=tk.EW)
 
         self.list_pasos = tk.Listbox(frame_preparacion,width=50)
-        self.list_pasos.grid(row=3,column=0,columnspan=3,padx=5,pady=5)
+        self.list_pasos.grid(row=4,column=0,columnspan=3,padx=5,pady=5)
 
-        self.btn_guardarAll = tk.Button(self.ventana,text="Guardar",command=self.guardar_general)
+        self.btn_guardarAll = tk.Button(self.ventana,text="Guardar Receta",command=self.guardar_general)
         self.btn_guardarAll.grid(row=7,column=1,sticky=tk.EW)
     
     def cargar_receta_modificar(self):
@@ -179,13 +179,19 @@ class Vista_Agregar:
         self.etiqueta.set(self.receta.etiqueta)
         self.fecha.set(self.receta.creacion)
         self.favorito.set(self.receta.favorito)
-        for ing in self.receta.ingredientes:
-            #cadena = f'{ing.nombre}'
-            self.list_ingredientes.insert(tk.END,ing)
-        for p in self.receta.lista_pasos:
-            #cadena = f'{ing.nombre}'
-            self.list_pasos.insert(tk.END,p)
+        self.carga_ingredientes()
+        self.carga_pasos()
+        
     #boton guardar todo
+    
+    def carga_ingredientes(self):
+        for ing in self.receta.ingredientes:
+            self.list_ingredientes.insert(tk.END,ing)
+            
+    def carga_pasos(self):
+        for p in self.receta.lista_pasos:
+            self.list_pasos.insert(tk.END,p)
+            
     def validar_cajas_gral(self):
         if self.nombre.get() != "" and self.preparacion.get()!="" and self.coccion.get()!="":
             return True
@@ -193,7 +199,8 @@ class Vista_Agregar:
             return False
         
     def guardar_general(self):
-        archivo_receta = rl("Recetario.json")
+        #archivo_receta = rl("Recetario.json")
+        
         if self.validar_cajas_gral():
             #print(self.receta.getDic())
             if self.bandera_modo:
@@ -203,7 +210,7 @@ class Vista_Agregar:
                 self.receta.etiqueta = self.etiqueta.get()
                 self.receta.favorito = self.favorito.get()
                 self.receta.creacion = dt.now()
-                if archivo_receta.agregarReceta(self.receta):
+                if log_receta.guardarReceta(self.receta):
                     messagebox.showinfo("Agregar Receta","La receta se ha guardado con exito!")
                     self.ventana.destroy()
                 else:
@@ -211,13 +218,14 @@ class Vista_Agregar:
             else:
                 res = messagebox.askyesno(title="Confirmar",message="¿Esta seguro que desea guardar los cambios?")
                 if res:
-                    pos = archivo_receta.buscarRecetaNombre(self.receta.nombre)
+                    #pos = archivo_receta.buscarRecetaNombre(self.receta.nombre)
                     self.receta.nombre = self.nombre.get()
                     self.receta.tiempoPreparacion = self.preparacion.get()
                     self.receta.tiempoCocion = self.coccion.get()
                     self.receta.etiqueta = self.etiqueta.get()
                     self.receta.favorito = self.favorito.get()
-                    archivo_receta.modificaReceta(self.receta,pos)
+                    #archivo_receta.modificaReceta(self.receta,pos)
+                    log_receta.actulizarReceta(self.receta)
                     messagebox.showinfo("Modificar","Cambios guardados exitosamente!")
                     self.ventana.destroy()
         else:
@@ -245,7 +253,6 @@ class Vista_Agregar:
         except:
             messagebox.showwarning("Ingredientes","Debe seleccionar un elemento de la lista")
         
-
     def limpar_ingrediente(self):
         self.nom_ing.set("")
         self.unidad.set("")
@@ -303,8 +310,7 @@ class Vista_Agregar:
             self.activar_control_paso(2)
         except:
             messagebox.showwarning("Pasos","Debe seleccionar un elemento de la lista")
-        
-    
+         
     def activar_control_paso(self,op):
         if op==0:
             self.entry_paso.config(state=tk.DISABLED)
@@ -326,12 +332,7 @@ class Vista_Agregar:
                 self.btn_eliminar_paso.config(state=tk.NORMAL)
             else:
                 self.btn_eliminar_paso.config(state=tk.DISABLED)
-            
-                
-               
-
-    
-        
+ 
 
 if __name__ == "__main__":
     root = tk.Tk()

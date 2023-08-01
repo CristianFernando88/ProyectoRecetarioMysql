@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk,messagebox
 from .Vista_AgregarModificar import Vista_Agregar
-from Recetario_Logica import RecetarioLogica as rl
+from LogicaRecetario import Logica as log_recetario
 from .Vista_Receta import VistaReceta as vr
 import datetime as dt
 
@@ -19,7 +19,6 @@ class Recetario(ttk.Frame):
         self.parent.geometry(self.alignstr)
         self.parent.title("RECETARIO")
         self.parent.iconbitmap('imagenes/icono.ico')
-        self.recetario = rl("Recetario.json")
         self.crear_widgets()
         self.cargar_receta_dia()
         self.llenar_tabla_recetas()
@@ -56,7 +55,7 @@ class Recetario(ttk.Frame):
         self.frame_recetas.grid(row=2,column=0,columnspan=4)
         
 
-        self.tabla_recetas = ttk.Treeview(self.frame_recetas,selectmode='browse',columns=tuple(['nombre', 'preparacion', 'coccion','etiqueta']))
+        self.tabla_recetas = ttk.Treeview(self.frame_recetas,selectmode='browse',columns=tuple(['nombre', 'preparacion', 'coccion','etiqueta','id_r']))
         self.tabla_recetas.grid(row=1, column=0, columnspan=4,padx=10, pady=5)
         
         # asignamos tamño a las columnas
@@ -65,6 +64,8 @@ class Recetario(ttk.Frame):
         self.tabla_recetas.column("preparacion", width=100, minwidth=10)
         self.tabla_recetas.column("coccion", width=100, minwidth=10)
         self.tabla_recetas.column("etiqueta", width=100, minwidth=10)
+        self.tabla_recetas.column("etiqueta", width=100, minwidth=10)
+        self.tabla_recetas.column("id_r", width=0, minwidth=0)
         
 
         # colocamos nombres a la cabecera
@@ -73,6 +74,7 @@ class Recetario(ttk.Frame):
         self.tabla_recetas.heading("preparacion", text="Preparación", anchor="center")
         self.tabla_recetas.heading("coccion", text="Cocción", anchor="center")
         self.tabla_recetas.heading("etiqueta", text="Etiqueta", anchor="center")
+        self.tabla_recetas.heading("id_r", text="Etiqueta", anchor="center")
         
         #botones crud
         self.btn_refrescar = tk.Button(self.frame_recetas,text="Refrescar tabla", command=self.llenar_tabla_recetas)
@@ -91,27 +93,30 @@ class Recetario(ttk.Frame):
         self.btn_modificar.grid(row=2,column=3)
     
     def cargar_receta_dia(self):
-        receta = self.recetario.retorna_aleatorio()
-        self.receta_dia.set(receta.nombre)
+        '''Obtiene la receta del dia por medio de un
+        metodo aleatorio y muestra en el entry de receta dia'''
+        self.recetaAleatorio = log_recetario.get_aleatorio()
+        self.receta_dia.set(self.recetaAleatorio.nombre)
         self.entry_receta_dia.config(state="readonly")
 
     def mostrar_receta_dia(self):
-        nombre = self.receta_dia.get()
-        #etiqueta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][3]
-        buscado = self.recetario.getReceta(nombre)
-        v_receta_dia = vr(self.parent,buscado)
+        '''muestra en un frame la receta del dia '''
+        recetaDia = log_recetario.getReceta(self.recetaAleatorio.id)
+        v_receta_dia = vr(self.parent,recetaDia)
 
     def llenar_tabla_recetas(self):
         self.tabla_recetas.delete(*self.tabla_recetas.get_children())
+        self.buscado.set("")
+        self.cbo_filtro.set("")
         num=0
         self.tabla_recetas.tag_configure('favorito', background='black', foreground='red')
         self.tabla_recetas.tag_configure('normal', background='white', foreground='red')
-        if self.recetario.getRecetas() != []:
+        if log_recetario.getRecetas() != []:
             #self.label_estado['text']=""
             
-            for receta in self.recetario.getRecetas():
+            for receta in log_recetario.getRecetas():
                 num += 1
-                valores = (receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta) 
+                valores = (receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta,receta.id) 
                 my_tag='favorito' if num == 1 else 'normal' 
                 self.tabla_recetas.insert("", tk.END, text=str(num),values=valores,tags = (my_tag))
                 '''if num == 1:
@@ -119,26 +124,26 @@ class Recetario(ttk.Frame):
                 else:
                     self.tabla_recetas.insert("", tk.END, text=str(num),values=valores)'''
                     
-
     
     def agregar(self):
         '''Abre una ventana top leve para agregar una receta'''
-        self.ventana_agregar = Vista_Agregar(self.parent)
+        ventana_agregar = Vista_Agregar(self.parent)
     
     def modificar(self):
         try:
-            nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
-            #etiqueta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][3]
-            buscado = self.recetario.getReceta(nombre)
+            #nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
+            id_receta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][4]
+            #print(id_receta)
+            buscado = log_recetario.getReceta(id_receta)
             v_modificar = Vista_Agregar(self.parent,buscado)
         except Exception:
             messagebox.showwarning("Receta","Debe seleccionar una fila de la tabla")
          
     def mostrar_receta(self):
         try:
-            nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
-            #etiqueta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][3]
-            buscado = self.recetario.getReceta(nombre)
+            #nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
+            id_receta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][4]
+            buscado = log_recetario.getReceta(id_receta)
             v_mostrar = vr(self.parent,buscado)
             
         except Exception:
@@ -146,41 +151,42 @@ class Recetario(ttk.Frame):
 
     def eliminar_receta(self):
         try:
-            nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
-            pos = self.recetario.buscarRecetaNombre(nombre)
+            
+            id_receta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][4]
             res = messagebox.askyesno(title="Confirmar",message="¿Estas seguro que deseas eliminar este elemento del recetario?")
             if res:
-                self.recetario.eliminarReceta(pos)
+                log_recetario.eliminarReceta(id_receta)
                 self.llenar_tabla_recetas()
 
         except Exception:
             messagebox.showwarning("Receta","Debe seleccionar una fila de la tabla")
 
     def busqueda_receta(self):
-        #print(self.buscado.get())
-        
+        '''Realiza busqueda por nombre o etiqueta y refleja en la tabla el resultado'''
         num=0
         #print(lista_buscado)
         if self.cbo_filtro.get() == "Nombre":
-            lista_buscado = list(filter(lambda r:  self.buscado.get().lower() in r.nombre.lower(),self.recetario.getRecetas()))
+            lista_buscado = list(filter(lambda r:  self.buscado.get().lower() in r.nombre.lower(),log_recetario.getRecetas()))
             if lista_buscado != []:
                 self.tabla_recetas.delete(*self.tabla_recetas.get_children())
                 for receta in lista_buscado:
                     num += 1
-                    self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta))
+                    self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta,receta.id))
             else:
                 messagebox.showinfo("Rcetario","No hay resultados para la busqueda.")
         elif self.cbo_filtro.get() == "Etiqueta":
-            lista_buscado = list(filter(lambda r:  self.buscado.get().lower() in r.etiqueta.lower(),self.recetario.getRecetas()))
+            lista_buscado = list(filter(lambda r:  self.buscado.get().lower() in r.etiqueta.lower(),log_recetario.getRecetas()))
             if lista_buscado != []:
                 self.tabla_recetas.delete(*self.tabla_recetas.get_children())
                 for receta in lista_buscado:
                     num += 1
-                    self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta))
+                    self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta,receta.id))
             else:
                 messagebox.showinfo("Rcetario","No hay resultados para la busqueda.")
         else:
-            messagebox.showinfo("Rcetario","Seleccione un filtro para buscar") 
+            messagebox.showinfo("Rcetario","Seleccione un filtro para buscar")
+            
+        
             
 
 

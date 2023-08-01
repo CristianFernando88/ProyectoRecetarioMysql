@@ -9,7 +9,7 @@ class VistaReceta:
         self.ventana = tk.Toplevel(self.parent)
         self.ventana.title("Receta")
         
-        self.ventana.width=335
+        self.ventana.width=450
         self.ventana.height=450
         self.screenwidth = self.ventana.winfo_screenwidth()
         self.screenheight = self.ventana.winfo_screenheight()
@@ -37,15 +37,15 @@ class VistaReceta:
     
     def agregar_contenido(self):
         self.cuadro_texto.insert('end',"PREPARACION:\n")
-        self.cuadro_texto.insert('end',self.tiempoPreparacion+" min."+"\n")
+        self.cuadro_texto.insert('end',f'{self.tiempoPreparacion}  min.\n')
         self.cuadro_texto.insert('end',"COCCION:\n")
-        self.cuadro_texto.insert('end',self.tiempoCocion+" min."+"\n")
+        self.cuadro_texto.insert('end',f'{self.tiempoCocion} min.\n')
         self.cuadro_texto.insert('end',"INGREDIENTES:\n")
         for ing in self.ingredientes:
-            self.cuadro_texto.insert('end',f'{ing}\n')
+            self.cuadro_texto.insert('end',f'-{ing.nombre}, {ing.cantidad} {ing.unidad_medida}.\n')
         self.cuadro_texto.insert('end',"PASOS:\n")
         for p in self.lista_pasos:
-            self.cuadro_texto.insert('end',f'{p}\n')
+            self.cuadro_texto.insert('end',f'*{p.orden}: {p.instruccion}\n')
             
         self.cuadro_texto.config(state=tk.DISABLED)
 

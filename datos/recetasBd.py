@@ -1,9 +1,10 @@
 from Conexion import Conexion
+from datetime import datetime
 class recetaBd:
     _SELECCIONAR = 'SELECT * FROM recetas'
     _INSERTAR = '''INSERT INTO recetas 
-                (nombre_receta,tiempo_preparacion,tiempo_coccion,fecha_creacion) 
-                VALUES (%s,%s,%s,%s)'''
+                (nombre_receta,tiempo_preparacion,tiempo_coccion,fecha_creacion,etiqueta) 
+                VALUES (%s,%s,%s,NOW(),%s)'''
     
     _ACTUALIZAR = '''UPDATE recetas SET 
                      nombre_receta = %s, 
@@ -25,12 +26,18 @@ class recetaBd:
         return registros
         
     @classmethod
-    def insertar(cls,receta):
+    def insertar(cls,nombre,preparacion,coccion,etiqueta):
+        '''inserta los valores en la tabla receta
+            receibe como parametro nombre,preparacion,coccion,etiqueta.
+        ''' 
+        trasaccion = False
         with Conexion.conectar()as conn:
-            with Conexion.get_cursor() as cr:
-                valores = (receta[0],receta[1],receta[2],receta[3])
+            with Conexion.getCursor() as cr:
+                valores = (nombre,preparacion,coccion,etiqueta)
                 cr.execute(cls._INSERTAR,valores)
+                trasaccion = True
             conn.commit()
+        return trasaccion
     
     @classmethod
     def eliminar(cls,id):
@@ -56,13 +63,13 @@ class recetaBd:
                 cr.execute(cls._BUSCAR,(b,))
                 resultado = cr.fetchall()
         return resultado
-    
-#receta = "Arroz con leche",20,30,datetime.datetime.now()
-#print(recetaDatos.insertar(receta))
-#print(recetaDatos.seleccionar())
-#print(recetaDatos.insertar(receta))
+if __name__ == "__main__":   
+    receta = ("Arroz con leche",20,30,datetime.now(),"Postre Tradicional")
+    print(recetaBd.insertar(receta[0],receta[1],receta[2],receta[4]))
+    #print(recetaDatos.seleccionar())
+    #print(recetaDatos.insertar(receta))
 
-buscado = "ensalada"
-resultado = recetaBd.buscar(buscado)
+    '''buscado = "ensalada"
+    resultado = recetaBd.buscar(buscado)
 
-print(resultado)
+    print(resultado)'''

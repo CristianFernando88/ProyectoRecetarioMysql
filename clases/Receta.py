@@ -3,7 +3,7 @@ from .Ingrediente import Ingrediente
 from .Pasos import Pasos
 class Receta:
     '''La clase representa a una receta'''
-    def __init__(self,nombre="",tiempoPreparacion="",tiempoCocion="",lista_ingredientes = [],lista_pasos= [],imagen=None,etiqueta="",favorito = False):
+    def __init__(self,nombre="",tiempoPreparacion="",tiempoCocion="",lista_ingredientes = [],lista_pasos= [],imagen=None,etiqueta="",favorito = False,id = None):
         '''El constructor puede recibir parametros o no
             para construir un objeto vacio, o tambien crear un objeto
             a partir de parametros posisiconales
@@ -15,15 +15,15 @@ class Receta:
         self.tiempoCocion = tiempoCocion
         self.ingredientes = lista_ingredientes
         self.lista_pasos = lista_pasos
-        self.creacion = dt.datetime.now()
+        self.creacion = None
         self.etiqueta = etiqueta
         self.favorito = favorito
-
+        self.id = id
+        
     def agregar_ingrediente(self,ingrediente):
         '''Agrega un ingrediente al atributo ingredientes
             que es una lista de objetos ingrediente
         '''
-        #ingrediente = Ingrediente(nombre,unidad,cantidad)
         self.ingredientes.append(ingrediente)
     def eliminar_ingrediente(self,ingrediente):
         '''recibe un objeto ingrediente y lo elimina de la lista de ingredientes
@@ -34,12 +34,28 @@ class Receta:
             if self.ingredientes[i].nombre == ingrediente.nombre:
                 del self.ingredientes[i]
                 break
-
+    def modificar_ingrediente(self,ingrediente):
+        '''Recibe un ingrediente y lo modifica'''
+        tam = len(self.ingredientes)
+        for i in range(0,tam):
+            if self.ingredientes[i].nombre == ingrediente.nombre:
+                self.ingredientes[i].unidad_medida = ingrediente.unidad_medida
+                self.ingredientes[i].cantidad = ingrediente.cantidad
+        
+    def get_ingrediente(self,id_ingrediente):
+        '''retorna un ingrediente de la lista si existe a
+        travez de un id'''
+        ing = None
+        tam = len(self.ingredientes)
+        for i in range(0,tam):
+            if id_ingrediente == self.ingredientes[i].id:
+                ing = self.ingredientes[i]           
+        return ing
+    
     def agregar_paso(self,paso):
         '''Agrega una instruccion al atributo lista_pasos
             que es una lista de objetos paso
         '''
-        #paso = Pasos(orden,instruccion)
         self.lista_pasos.append(paso)
     
     def eliminar_paso(self,paso):
@@ -86,6 +102,10 @@ class Receta:
         '''retorna un str con info basica de la receta'''
         return f"nombre: {self.nombre}, preparacion: {self.tiempoPreparacion}, coccion: {self.tiempoCocion}"
 
+    def getTupla(self):
+        "Retorna una tupla con los atributos del objeto"
+        return (self.nombre,self.tiempoPreparacion,self.tiempoCocion,self.etiqueta)
+    
 if __name__ == "__main__":
     receta1 = Receta("arroz con leche","10 min","60 min")
     paso1 = "Hacer corona de harina"

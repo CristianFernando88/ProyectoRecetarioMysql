@@ -1,5 +1,5 @@
 import mysql.connector
-from Config import credenciales
+from .Config import credenciales
 from mysql.connector import errors
 class Conexion:
     _conn = None
@@ -7,13 +7,14 @@ class Conexion:
 
     @classmethod
     def conectar(cls):
-        if cls._conn is None:
+        if cls._conn is None or cls._conn.is_connected() == False:
             try:
                 cls._conn = mysql.connector.connect(**credenciales)
+                cls._cursor = cls._conn.cursor()
                 return cls._conn
             except errors.DatabaseError as e:
                 print(f"No se pudo concetar a la base: {e}")
-        else:
+        elif cls._conn.is_connected():
             return cls._conn
     
     @classmethod
@@ -43,9 +44,9 @@ if __name__ == "__main__":
 
     conexion =  Conexion.conectar()
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM receta")
+    cursor.execute("SELECT * FROM recetas")
     consulta = cursor.fetchall()
-    conexion.close_conn()
+    conexion.close()
     print(consulta)
 
 
