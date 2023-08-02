@@ -96,13 +96,15 @@ class Recetario(ttk.Frame):
         '''Obtiene la receta del dia por medio de un
         metodo aleatorio y muestra en el entry de receta dia'''
         self.recetaAleatorio = log_recetario.get_aleatorio()
-        self.receta_dia.set(self.recetaAleatorio.nombre)
-        self.entry_receta_dia.config(state="readonly")
+        if self.recetaAleatorio != None:
+            self.receta_dia.set(self.recetaAleatorio.nombre)
+            self.entry_receta_dia.config(state="readonly")
 
     def mostrar_receta_dia(self):
         '''muestra en un frame la receta del dia '''
-        recetaDia = log_recetario.getReceta(self.recetaAleatorio.id)
-        v_receta_dia = vr(self.parent,recetaDia)
+        if self.recetaAleatorio != None:
+            recetaDia = log_recetario.getReceta(self.recetaAleatorio.id)
+            v_receta_dia = vr(self.parent,recetaDia)
 
     def llenar_tabla_recetas(self):
         self.tabla_recetas.delete(*self.tabla_recetas.get_children())

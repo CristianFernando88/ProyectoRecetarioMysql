@@ -1,5 +1,5 @@
 # modificar credenciales solo aqui
 credenciales = {'user': 'root',
-                'password': 'AYATA_88',
+                'password': '1088',
                 'host': 'localhost',
                 'database': 'recetario'}

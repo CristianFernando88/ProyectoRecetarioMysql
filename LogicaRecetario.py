@@ -63,9 +63,13 @@ class Logica:
         return ingredientes
          
     def get_aleatorio():
+        """Retorna una receta aleatoria de la 
+        base de datos si esta no existe retorna none"""
         lista = servicios.consultaRecetas()
-        aleatorio = random.choice(lista)
-        receta = Logica.getReceta(aleatorio[0])
+        receta = None
+        if len(lista)>0:
+            aleatorio = random.choice(lista)
+            receta = Logica.getReceta(aleatorio[0])
         return receta
     
     def guardarReceta(receta):
