@@ -1,6 +1,9 @@
 from datos.Conexion import Conexion as conexion
 from datetime import datetime
 from clases.Receta import Receta
+from datos.Config import credenciales
+import mysql.connector
+from mysql.connector import errors
 class Servicios:
     '''
     Esta clase realiza todas las transacciones con la base de datos
@@ -291,6 +294,62 @@ class Servicios:
             conn.commit()
         return trasaccion 
 
+    def create_if_not_exists():
+        """Crea la base de datos y la tabla si no existen.
+        
+        Esto asegura que la aplicacion funcione aunque no
+        exista la base de datos previamente.
+        Si es necesario que exista el usuario (con sus respectivos permisos)
+        en el servidor.
+        """
+        create_database = "CREATE DATABASE IF NOT EXISTS %s" %credenciales["database"]
+        create_table_receta = """CREATE TABLE IF NOT EXISTS recetas(
+                                    id_receta INT NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+                                    nombre VARCHAR(60),
+                                    t_preparacion SMALLINT,
+                                    t_coccion SMALLINT,
+                                    creacion DATE,
+                                    etiqueta VARCHAR(60),
+                                    favorito BOOLEAN DEFAULT FALSE
+                                )ENGINE = InnoDB;"""
+        create_table_ingredientes = """CREATE TABLE IF NOT EXISTS ingredientes(
+                                        id_ing INT NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+                                        nombre VARCHAR(60)
+                                    )ENGINE = InnoDB;"""
+        create_table_receta_ingrediente = """CREATE TABLE IF NOT EXISTS receta_ingrediente(
+                                                id_rxi INT NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+                                                receta_id INT,
+                                                ing_id INT,
+                                                unidad VARCHAR(30),
+                                                cantidad VARCHAR(30),
+                                                CONSTRAINT fk_receta FOREIGN KEY(receta_id) REFERENCES recetas(id_receta) ON DELETE CASCADE,
+                                                CONSTRAINT fk_ingrediente FOREIGN KEY(ing_id) REFERENCES ingredientes(id_ing)
+                                            )ENGINE = InnoDB;"""
+        create_table_preparacion = """CREATE TABLE IF NOT EXISTS preparacion(
+                                    id_preparacion INT NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+                                    descripcion VARCHAR(255),
+                                    orden TINYINT,
+                                    receta_id INT,
+                                    CONSTRAINT fk_receta_p FOREIGN KEY (receta_id) REFERENCES recetas(id_receta) ON DELETE CASCADE
+                                )ENGINE = InnoDB;"""
+                           
+        try:
+            conn = mysql.connector.connect(user=credenciales["user"],
+                                        password=credenciales["password"],
+                                        host="127.0.0.1")
+            cur = conn.cursor()
+            cur.execute(create_database)
+            cur.execute("USE %s" %credenciales["database"])
+            cur.execute(create_table_receta)
+            cur.execute(create_table_ingredientes)
+            cur.execute(create_table_receta_ingrediente)
+            cur.execute(create_table_preparacion)
+            conn.commit()
+            conn.close()
+        except errors.DatabaseError as err:
+            print("Error al conectar o crear la base de datos.", err)
+            raise
+    
 if __name__ == "__main__":
     #recetas = Servicios.getRecetasdb()
     #print(recetas)
